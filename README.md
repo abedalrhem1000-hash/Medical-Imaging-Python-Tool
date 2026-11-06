@@ -1,4 +1,4 @@
-# 3D Medical Imaging & PACS Workstation (Python)
+#  Medical Imaging & PACS Workstation (Python)
 
 A professional interactive 3D medical imaging workstation prototype built with Python for loading, visualizing, and analyzing multi-modality medical datasets (DICOM and NIfTI formats).
 
