@@ -1,3 +1,47 @@
+import sys
+import subprocess
+
+# ==========================================
+# 0. فحص وتثبيت المكتبات المطلوبة تلقائياً
+# ==========================================
+required_libraries = {
+    'numpy': 'numpy',
+    'nibabel': 'nibabel',
+    'pydicom': 'pydicom',
+    'matplotlib': 'matplotlib',
+    'scipy': 'scipy'
+}
+
+missing_libs = []
+for lib_name, pip_name in required_libraries.items():
+    try:
+        __import__(lib_name)
+    except ImportError:
+        missing_libs.append(pip_name)
+
+if missing_libs:
+    import tkinter as tk
+    from tkinter import messagebox
+    
+    root_temp = tk.Tk()
+    root_temp.withdraw()
+    
+    msg = f"المكتبات التالية غير متوفرة على جهازك:\n{', '.join(missing_libs)}\n\nهل تريد تثبيتها تلقائياً الآن للبدء؟"
+    answer = messagebox.askyesno("تثبيت المكتبات المطلوبة - Medical Workstation", msg)
+    
+    if answer:
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install"] + missing_libs)
+        except Exception as e:
+            messagebox.showerror("خطأ في التثبيت", f"حدث خطأ أثناء تثبيت المكتبات:\n{e}")
+            sys.exit(1)
+    else:
+        sys.exit(0)
+    root_temp.destroy()
+
+# ==========================================
+# استيراد المكتبات بعد التأكد من توفرها
+# ==========================================
 import os
 import tkinter as tk
 from tkinter import filedialog
@@ -14,7 +58,7 @@ root = tk.Tk()
 root.withdraw()
 
 # ==========================================
-# 1. Universal Medical Image Loader (معالجة دقيقة ومنفصلة للـ IMA والـ NIfTI)
+# 1. Universal Medical Image Loader
 # ==========================================
 def load_medical_image(path):
     if os.path.isdir(path):
@@ -106,7 +150,7 @@ panels = {
     'p1': {'seq': default_seq, 'slice': nz // 2, 'rot': 0, 'cx': nx // 2, 'cy': ny // 2, 'cz': nz // 2},
     'p2': {'seq': default_seq, 'slice': nz // 2, 'rot': 0, 'cx': nx // 2, 'cy': ny // 2, 'cz': nz // 2}, 
     'p3': {'seq': default_seq, 'slice': nz // 2, 'rot': 0, 'cx': nx // 2, 'cy': ny // 2, 'cz': nz // 2},
-    'p4': {'seq': default_seq, 'slice': nz // 2, 'rot': 0, 'cx': nx // 2, 'cy': ny // 2, 'cz': nz // 2}         
+    'p4': {'seq': default_seq, 'slice': nz // 2, 'rot': 0, 'cx': nx // 2, 'cy': ny // 2, 'cz': nz // 2}        
 }
 
 global_state = {
@@ -283,7 +327,7 @@ for l in export_button.ax.texts: l.set_color('black'); l.set_fontweight('bold')
 export_button.on_clicked(lambda e: fig.savefig("workstation_report.png", dpi=300, bbox_inches='tight', facecolor=fig.get_facecolor()))
 
 # ==========================================
-# 4. Full Quality MRI Display Function (عرض أصلي نقي للصور القديمة والجديدة)
+# 4. Full Quality MRI Display Function
 # ==========================================
 def update_display():
     if global_state.get('updating_slider', False):
@@ -358,7 +402,6 @@ def update_display():
             
             im_slice = data[:, :, p_info['slice']].T
             
-            # تطبيق تعديلات السطوع والتباين بشكل سلس وطبيعي دون تشويش
             processed = im_slice * con + bri
             if sha != 1.0:
                 blurred = gaussian_filter(processed, sigma=1.0)
